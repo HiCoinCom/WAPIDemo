@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>BAAS测试</title>
+	<script type="text/javascript" src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+	<link href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+	<form method="POST" action="http://192.168.60.201:8084/api/pay/preOrder">
+		<input type="hidden" name="time" value="">
+		<input type="hidden" name="biz_content" value="">
+		<input type="hidden" name="version" value="1.0">
+		<input type="hidden" name="charset" value="utf8">
+		<div class="input-group">
+		  <span class="input-group-addon">APPID</span>
+		  <input name="app_id" value="123" type="text" class="form-control" placeholder="" aria-describedby="basic-addon1">
+		</div>
+
+		<div class="input-group">
+		  <span class="input-group-addon">APPKEY</span>
+		  <input id="app_key" value="12344321" type="text" class="form-control" placeholder="" aria-describedby="basic-addon1">
+		</div>
+
+		<div class="input-group">
+		  <span class="input-group-addon">SIGN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+		  <input name="sign" type="text" class="form-control" placeholder="" aria-describedby="basic-addon1">
+		</div>
+
+		<div class="input-group">
+		  <span class="input-group-addon">用户&nbsp;&nbsp;&nbsp;ID</span>
+		  <input id="channel_uid" value="1" type="text" class="form-control" placeholder="" aria-describedby="basic-addon1">
+		</div>
+
+		<div class="input-group">
+		  <span class="input-group-addon">订单&nbsp;&nbsp;&nbsp;号</span>
+		  <input id="out_trade_no" type="text" class="form-control" placeholder="" aria-describedby="basic-addon1">
+		</div>
+
+		<div class="input-group">
+		  <span class="input-group-addon">订单标题</span>
+		  <input id="subject" type="text" value="订单标题" class="form-control" placeholder="" aria-describedby="basic-addon1">
+		</div>
+
+		<div class="input-group">
+		  <span class="input-group-addon">订单说明</span>
+		  <input id="body" type="text" value="订单说明" class="form-control" placeholder="" aria-describedby="basic-addon1">
+		</div>
+
+		<div class="input-group">
+		  <span class="input-group-addon">订单金额</span>
+		  <input id="total_amount" type="text" value="" class="form-control" placeholder="分" aria-describedby="basic-addon1">
+		</div>
+
+		<div class="input-group">
+		  <span class="input-group-addon">支付方式</span>
+		  <select id="pay_type" class="form-control" >
+		  	<option selected="selected" value="1">支付宝 </option>
+		  	<option value="2">微信 </option>
+		  	<option value="3">银行卡 </option>
+		  </select>
+		</div>
+
+
+		<div class="input-group" style="display: none;">
+		  <span class="input-group-addon">收款账号</span>
+		  <input id="settle_user_account" type="text" value="abc123" class="form-control" placeholder="" aria-describedby="basic-addon1">
+		</div>
+
+		<div class="input-group" style="display: none;">
+		  <span class="input-group-addon">收款名称</span>
+		  <input id="settle_user_name" type="text" value="测试用户" class="form-control" placeholder="" aria-describedby="basic-addon1">
+		</div>
+
+		<div class="input-group" style="display: none;">
+		  <span class="input-group-addon">收款银行</span>
+		  <input id="settle_platform" type="text" value="ailpay" class="form-control" placeholder="" aria-describedby="basic-addon1">
+		</div>
+
+		<div class="input-group">
+		  <span class="input-group-addon">订单类型</span>
+		  <select id="order_type" class="form-control" >
+		  	<option selected="selected" value="1">充值 </option>
+		  	<option value="2">提现 </option>
+		  </select>
+		</div>
+
+	</form>
+	<br><br>
+	<div class="btn-group" role="group" aria-label="...">
+	  <button id="create_order" type="button" class="btn">提交</button>
+	</div>
+	<div class="btn-group" role="group" aria-label="...">
+	  <button id="gen_no" type="button" class="btn">生成订单号</button>
+	</div>
+
+	<script type="text/javascript">
+		function gen_sign(){
+			var app_id = $.trim($("[name='app_id']").val());
+			var app_key = $.trim($("[id='app_key']").val());
+			var biz = $.trim($("[name='biz_content']").val());
+			var time = $.trim($("[name='time']").val());
+			var version = $.trim($("[name='version']").val());
+			var charset = $.trim($("[name='charset']").val());
+
+		    var sign_str = "app_id="+app_id+"&biz_content="+biz+"&charset="+charset+"&time="+time+"&version="+version;
+		    console.log("sign_str:", sign_str);
+		    return md5(sign_str + app_key);
+		}
+
+		$(function () {
+			$("#order_type").change(function(){
+				if(1 == $("#order_type").val()){
+					$("form").prop("action", "http://dev4openapi.chaindown.com/api/pay/preOrder");
+					$("#settle_platform").parent().hide();
+					$("#settle_user_name").parent().hide();
+					$("#settle_user_account").parent().hide();
+				}else{
+					$("form").prop("action", "http://dev4openapi.chaindown.com/api/sale/preOrder");
+					$("#settle_platform").parent().show();
+					$("#settle_user_name").parent().show();
+					$("#settle_user_account").parent().show();
+				}
+			})
+
+			$("#gen_no").click(function(){
+				 var date = new Date();
+            	 var date_str = "TG" + date.getFullYear() + '' + (date.getMonth() + 1) + '' + date.getDate() + date.getHours()+date.getMinutes()+date.getMilliseconds();
+				 $("#out_trade_no").val(date_str);
+			});
+
+			$('#create_order').click(function(){
+				if($.trim($("[name='app_id']").val()) == ""){
+					return alert("请输入APPID"),!1;
+				}
+
+				if($.trim($("[id='app_key']").val()) == ""){
+					return alert("请输入APPKEY"),!1;
+				}
+
+				var subject = $.trim($("#subject").val());
+				var body = $.trim($("#body").val());
+				var trade_no = $.trim($("#out_trade_no").val());
+				var money = parseInt("0" + $("#total_amount").val());
+				var pay_type = $.trim($("#pay_type").val());
+				var uid = $.trim($("#channel_uid").val());
+
+				if(subject == ""){
+					return alert("请输入订单标题"),!1;
+				}
+
+				if(body == ""){
+					return alert("请输入订单说明"),!1;
+				}
+
+				if(trade_no == ""){
+					return alert("请输入订单号"),!1;
+				}
+
+				if(uid == ""){
+					return alert("请输入渠道用户id"),!1;
+				}
+
+				if(money <= 0){
+					return alert("请输入金额"),!1;
+				}
+
+				var biz_data = {
+					"subject":subject + trade_no,
+					"body":body + trade_no,
+					"channel_uid":uid,
+					"out_trade_no":trade_no,
+					"pay_type":pay_type,
+					"total_amount":money,
+				};
+
+				if(1 != $("#order_type").val()){
+					var uaccount = $.trim($("#settle_user_account").val());
+					var uname = $.trim($("#settle_user_name").val());
+					var ubank = $.trim($("#settle_platform").val());
+
+					if(uaccount == ""){
+						return alert("请输入收款账号"),!1;
+					}
+
+					if(uname == ""){
+						return alert("请输入收款名称"),!1;
+					}
+
+					if(ubank == ""){
+						return alert("请输入收款银行"),!1;
+					}
+					biz_data["settle_user_account"] = uaccount;
+					biz_data["settle_user_name"] = uname;
+					biz_data["settle_platform"] = ubank;
+				}
+
+				var biz = JSON.stringify(biz_data);
+
+				console.log(biz);
+				$("[name=time]").val((new Date()).getTime());
+				$("[name=biz_content]").val(biz);
+				$("[name=sign]").val(gen_sign());
+				$("form").submit();
+			})
+		});
+
+	</script>
+</body>
+</html>

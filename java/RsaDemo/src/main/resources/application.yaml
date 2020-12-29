@@ -1,0 +1,13 @@
+
+server:
+    #服务端口
+    port: 8001
+    # 解决静态资源中文乱码问题！
+    servlet:
+        encoding:
+            force: true
+
+#日志相关
+logging:
+    level:
+        root: info

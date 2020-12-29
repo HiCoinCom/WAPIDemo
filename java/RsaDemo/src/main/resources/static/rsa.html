@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>BAAS请求DEMO</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <link rel="stylesheet" href="http://res.layui.com/layui/dist/css/layui.css"  media="all">
+        <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    </head>
+    <body>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">baas请求地址</label>
+            <div class="layui-input-block">
+                <input type="text" name="baasUrl" id="baasUrl" style="width:1000px;">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">AppId</label>
+            <div class="layui-input-block">
+                <textarea type="text" name="appId" id="appId"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">对方公钥匙</label>
+            <div class="layui-input-block">
+                <textarea type="text" name="oppositePublicKey" id="oppositePublicKey"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">自己私钥</label>
+            <div class="layui-input-block">
+                <textarea type="text" name="myPrivateKey" id="myPrivateKey"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">请求数据(JSON格式)</label>
+            <div class="layui-input-block">
+                <textarea class="layui-textarea" name="jsonData" id="jsonData"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" id="submit_request">提    交</button>
+            </div>
+        </div>
+
+        <hr class="layui-bg-red">
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">请求数据加密(使用对方公钥加密)</label>
+            <div class="layui-input-block">
+                <textarea class="layui-textarea" name="requestData" id="requestData"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">sign数据</label>
+            <div class="layui-input-block">
+                <textarea class="layui-textarea" name="requestSign" id="requestSign"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">请求返回数据</label>
+            <div class="layui-input-block">
+                <textarea class="layui-textarea" name="baasResult" id="baasResult"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">返回数据解密</label>
+            <div class="layui-input-block">
+                <textarea class="layui-textarea" name="baasData" id="baasData"></textarea>
+            </div>
+        </div>
+
+        <script src="//res.layui.com/layui/dist/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+        <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+        <script>
+
+            $('#submit_request').click(function(){
+                const appId = $("#appId").val();
+                const baasUrl = $("#baasUrl").val();
+                const oppositePublicKey = $("#oppositePublicKey").val();
+                const myPrivateKey = $("#myPrivateKey").val();
+                const jsonData = $("#jsonData").val();
+
+                $("#requestData").val(" ");
+                $("#requestSign").val(" ");
+                $("#baasResult").val(" ");
+                $("#baasData").val(" ");
+
+                $.ajax({
+                    type : "POST",
+                    url : "http://127.0.0.1:8001/requestBaas",
+                    contentType: "application/json;charset=utf-8",
+                    data : JSON.stringify({appId : appId, baasUrl : baasUrl, oppositePublicKey : oppositePublicKey ,myPrivateKey : myPrivateKey, jsonData : jsonData}),
+                    dataType : "json",
+                    success : function(data){
+
+                        const code = data.code;
+                        if (code === '0') {
+                            const  requestData = data.requestData;
+                            $("#requestData").val(requestData);
+
+                            const  requestSign = data.requestSign;
+                            $("#requestSign").val(requestSign);
+
+                            const baasResult = data.baasResult;
+                            $("#baasResult").val(baasResult)
+
+                            const baasData = data.baasData;
+                            $("#baasData").val(baasData)
+                        } else {
+                            alert(data.msg);
+                        }
+                    },
+                    error:function(jqXHR){
+                        //console.log("Error: "+jqXHR.status);
+                        alert("系统异常！！！")
+                    }
+                });
+            });
+
+            function xx(qrid,username,token){
+                $.ajax({
+                    url:"http://api.passport.pptv.com/v3/login/qrcode.do",
+                    type:"post",
+                    dataType:"jsonp",
+                    data:{from:"clt",qrid:qrid,username:username,token:token},
+                    success:function(data){
+                        try {
+                            var p = external.GetObject('@xxx.com/passport;1');
+                            p.On3rdLogin2(0,0,data,true);
+                        } catch (e) {
+                            return false;
+                        }
+                        setTimeout(function () {
+                            try {
+                                var wb = external.Get('Signin2Window');
+                                wb.OnClose();
+                            } catch (e) {
+                            }
+                        }, 200);
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
